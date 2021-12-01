@@ -1,8 +1,13 @@
 require 'sinatra/base'
 require "sinatra/reloader" 
+require_relative "./lib/health"
 
 class Battle < Sinatra::Base
   enable :sessions
+
+  before do
+    session[:health] = Health.instance
+  end
 
   configure :development do
     register Sinatra::Reloader
@@ -19,11 +24,16 @@ class Battle < Sinatra::Base
     erb :play
   end
 
+  post '/attack' do
+    session[:health].decrease
+    redirect '/play'
+  end
+
   post '/name' do
   session[:name] = params[:name]
   session[:name2] = params[:name2]
   redirect '/play'
-  end
+  end  
 
 
   run! if app_file == $0
